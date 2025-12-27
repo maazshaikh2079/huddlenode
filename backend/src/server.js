@@ -120,13 +120,14 @@ async function connectDB() {
   if (isConnected) return;
 
   try {
+    console.log("log> Attempting to connect to MongoDB..."); // Add this
     const db = await mongoose.connect(
-      `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.g9wuk9q.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority&appName=Cluster0`,
-      { useNewUrlParser: true, useUnifiedTopology: true }
+      `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.g9wuk9q.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority&appName=Cluster0`
+      // { useNewUrlParser: true, useUnifiedTopology: true }
     );
     // 1 = connected, 2 = connecting
     isConnected = db.connections[0].readyState === 1;
-    console.log("log> Connected to database!");
+    console.log("log> Successfully connected to MongoDB!");
   } catch (error) {
     console.log("log> MongoDB connection FAILED!!!");
     console.error(error);
