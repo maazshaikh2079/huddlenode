@@ -16,11 +16,27 @@ app.use(express.json());
 // CORS middleware
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*"); // Allow all origins
+
+  // const allowedOrigins = [
+  //   "http://localhost:5173",
+  //   "https://your-frontend-link.vercel.app",
+  // ];
+  // const origin = req.headers.origin;
+  // if (allowedOrigins.includes(origin)) {
+  //   res.setHeader("Access-Control-Allow-Origin", origin);
+  // } else {
+  //   res.setHeader("Access-Control-Allow-Origin", "*");
+  // }
+
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PATCH, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
 
   // For preflight requests (OPTIONS), return OK
   if (req.method === "OPTIONS") return res.sendStatus(200);
@@ -101,27 +117,35 @@ app.use((error, req, res, next) => {
 let isConnected = false;
 
 async function connectDB() {
+  if (isConnected) return;
+
   try {
-    await mongoose.connect(
+    const db = await mongoose.connect(
       `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.g9wuk9q.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority&appName=Cluster0`,
       { useNewUrlParser: true, useUnifiedTopology: true }
     );
-    isConnected = true;
+    // 1 = connected, 2 = connecting
+    isConnected = db.connections[0].readyState === 1;
     console.log("log> Connected to database!");
-    console.log(`log> app listening on PORT:${process.env.PORT || 5000}`);
   } catch (error) {
     console.log("log> MongoDB connection FAILED!!!");
-    console.log("log> Error:-");
     console.error(error);
   }
 }
 
-// add middleware
-app.use((req, res, next) => {
-  if (!isConnected) {
-    connectDB();
-  }
+// Ensure DB is connected before any route logic runs
+app.use(async (req, res, next) => {
+  await connectDB();
   next();
 });
+
+// Vercel handles the "listening" part automatically.
+// We only call app.listen() if we are NOT on Vercel (local dev).
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`log> Local server running on PORT:${PORT}`);
+  });
+}
 
 export default app;
