@@ -47,26 +47,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Test route
-app.get("/", (_, res) => res.send("<h1>Server started</h1>"));
-app.get("/favicon.ico", (req, res) => res.status(204).end());
-
-// routes import
-import userRouter from "./routes/users.routes.js";
-import forumRouter from "./routes/forums.routes.js";
-import postRouter from "./routes/posts.routes.js";
-import commentRouter from "./routes/comments.routes.js";
-
-// routes declaration in middleware `use`
-app.use("/api/users", userRouter);
-app.use("/api/forums", forumRouter);
-app.use("/api/posts", postRouter);
-app.use("/api/comments", commentRouter);
-
 // Database Connection Logic
 // Optimized for Vercel Serverless and Local Dev
 let isConnected = false;
-
 async function connectDB() {
   if (isConnected) return; // Skip if already connected
 
@@ -100,6 +83,22 @@ app.use(async (req, res, next) => {
       .json({ message: `Database connection failed. Error: ${err.message}` });
   }
 });
+
+// BASIC route
+app.get("/", (_, res) => res.send("<h1>Server started</h1>"));
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
+// routes import
+import userRouter from "./routes/users.routes.js";
+import forumRouter from "./routes/forums.routes.js";
+import postRouter from "./routes/posts.routes.js";
+import commentRouter from "./routes/comments.routes.js";
+
+// routes declaration in middleware `use`
+app.use("/api/users", userRouter);
+app.use("/api/forums", forumRouter);
+app.use("/api/posts", postRouter);
+app.use("/api/comments", commentRouter);
 
 // Local Listener
 if (!process.env.VERCEL) {
