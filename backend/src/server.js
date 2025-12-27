@@ -117,36 +117,30 @@ app.use((error, req, res, next) => {
 let isConnected = false;
 
 async function connectDB() {
-  if (isConnected) return;
+  if (isConnected) return; // Skip if already connected
 
   try {
-    console.log("log> Attempting to connect to MongoDB..."); // Add this
     const db = await mongoose.connect(
-      `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.g9wuk9q.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority&appName=Cluster0`
-      // { useNewUrlParser: true, useUnifiedTopology: true }
+      `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.g9wuk9q.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
+      { useNewUrlParser: true, useUnifiedTopology: true }
     );
-    // 1 = connected, 2 = connecting
+    // Connection states: 0 = disconnected, 1 = connected
     isConnected = db.connections[0].readyState === 1;
-    console.log("log> Successfully connected to MongoDB!");
+    console.log("log> MongoDB Connected Successfully");
   } catch (error) {
-    console.log("log> MongoDB connection FAILED!!!");
-    console.error(error);
+    console.error("log> MongoDB Connection Error:", error.message);
+    throw error;
   }
 }
 
-// Ensure DB is connected before any route logic runs
+// Global middleware - MUST be async and MUST await
 app.use(async (req, res, next) => {
-  await connectDB();
-  next();
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({ message: "Database connection failed" });
+  }
 });
-
-// Vercel handles the "listening" part automatically.
-// We only call app.listen() if we are NOT on Vercel (local dev).
-if (!process.env.VERCEL) {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`log> Local server running on PORT:${PORT}`);
-  });
-}
 
 export default app;
