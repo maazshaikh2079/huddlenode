@@ -9,6 +9,8 @@ import mongoose from "mongoose";
 
 import { ApiError } from "./utils/ApiError.js";
 
+mongoose.set("bufferCommands", false);
+
 const app = express();
 
 app.use(express.json());
@@ -62,41 +64,41 @@ app.use("/api/forums", forumRouter);
 app.use("/api/posts", postRouter);
 app.use("/api/comments", commentRouter);
 
-// Error handling:-
+// // Error handling:-
 
-// Error handler for Unsupported Routes (Route not found handler)
-app.use((req, res, next) => {
-  const error = new ApiError("Could not find this route.", 404);
-  // throw error;
-  return next(error);
-});
+// // Error handler for Unsupported Routes (Route not found handler)
+// app.use((req, res, next) => {
+//   const error = new ApiError("Could not find this route.", 404);
+//   // throw error;
+//   return next(error);
+// });
 
-// General error handler
-app.use((error, req, res, next) => {
-  console.log("log> app.js - error:-");
-  console.error(error); // log for debugging
+// // General error handler
+// app.use((error, req, res, next) => {
+//   console.log("log> app.js - error:-");
+//   console.error(error); // log for debugging
 
-  // Note: Below `if` block will delete image file from `uploads/images` folder, if request carries image file (i.e req.file) and image file is present in `uploads/images` folder
-  if (req.file && fs.existsSync(req.file.path)) {
-    fs.unlink(req.file.path, (err) => {
-      console.log("log> app.js - file delete err:-");
-      console.log(err);
-    });
-  }
+//   // Note: Below `if` block will delete image file from `uploads/images` folder, if request carries image file (i.e req.file) and image file is present in `uploads/images` folder
+//   if (req.file && fs.existsSync(req.file.path)) {
+//     fs.unlink(req.file.path, (err) => {
+//       console.log("log> app.js - file delete err:-");
+//       console.log(err);
+//     });
+//   }
 
-  if (res.headersSent) {
-    return next(error);
-  }
+//   if (res.headersSent) {
+//     return next(error);
+//   }
 
-  // Ensure error.code is numeric; fallback to 500
-  const status = typeof error.code === "number" ? error.code : 500;
+//   // Ensure error.code is numeric; fallback to 500
+//   const status = typeof error.code === "number" ? error.code : 500;
 
-  res.status(status).json({
-    message:
-      error.message ||
-      "Something went wrong! An unknown error occurred - app.js",
-  });
-});
+//   res.status(status).json({
+//     message:
+//       error.message ||
+//       "Something went wrong! An unknown error occurred - app.js",
+//   });
+// });
 
 // mongoose
 //   .connect(
@@ -119,11 +121,16 @@ let isConnected = false;
 async function connectDB() {
   if (isConnected) return; // Skip if already connected
 
+  const dbUri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.g9wuk9q.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+
   try {
-    const db = await mongoose.connect(
-      `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.g9wuk9q.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
-      { useNewUrlParser: true, useUnifiedTopology: true }
-    );
+    const db = await mongoose.connect(dbUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      // 3. Shorten timeout so Vercel doesn't hang indefinitely
+      connectTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
     // Connection states: 0 = disconnected, 1 = connected
     isConnected = db.connections[0].readyState === 1;
     console.log("log> MongoDB Connected Successfully");
@@ -139,8 +146,30 @@ app.use(async (req, res, next) => {
     await connectDB();
     next();
   } catch (err) {
-    res.status(500).json({ message: "Database connection failed" });
+    res
+      .status(503)
+      .json({ message: `Database connection failed. Error: ${err.message}` });
   }
+});
+
+// Error handling
+app.use((req, res, next) => {
+  next(new ApiError("Could not find this route.", 404));
+});
+
+app.use((error, req, res, next) => {
+  if (req.file && fs.existsSync(req.file.path)) {
+    fs.unlink(req.file.path, (err) => {
+      if (err) console.error("log> File delete err:", err);
+    });
+  }
+
+  if (res.headersSent) return next(error);
+
+  const status = typeof error.code === "number" ? error.code : 500;
+  res.status(status).json({
+    message: error.message || "An unknown error occurred on the server.",
+  });
 });
 
 export default app;
