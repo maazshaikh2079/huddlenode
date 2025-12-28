@@ -116,7 +116,8 @@ const createPost = async (req, res, next) => {
   // if (imageLocalPath) {
   if (imageBuffer) {
     try {
-      const imageRes = await uploadOnCloudinary(imageLocalPath);
+      // const imageRes = await uploadOnCloudinary(imageLocalPath);
+      const imageRes = await uploadOnCloudinary(imageBuffer);
       // console.log("log> imageRes:-\n", imageRes);
       if (imageRes?.secure_url) imageUrl = imageRes.secure_url;
     } catch (err) {
@@ -443,7 +444,8 @@ const editPostImage = async (req, res, next) => {
   // Handle Cloudinary Upload, URL formatting, DB Saving, and Cloudinary Deletion in one block
   try {
     // Uploading new pfp on cloudinary
-    const newImageRes = await uploadOnCloudinary(imageLocalPath);
+    // const newImageRes = await uploadOnCloudinary(imageLocalPath);
+    const newImageRes = await uploadOnCloudinary(imageBuffer);
     console.log("log> newImageRes:-");
     console.log(newImageRes);
 
