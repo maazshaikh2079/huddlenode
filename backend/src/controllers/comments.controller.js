@@ -9,7 +9,7 @@ import { ApiError } from "../utils/ApiError.js";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
-} from "../utils/cloudinary.js";
+} from "../utils/cloudinary-local.js";
 
 const getAllComments = async (req, res, next) => {
   console.log("log> GET req in `/comments`");
@@ -44,8 +44,15 @@ const getAllComments = async (req, res, next) => {
 const createComment = async (req, res, next) => {
   console.log("log> POST req in `/comments/post/:postId`");
 
-  console.log("log> req.file:-");
-  console.log(req.file);
+  // console.log("log> req.file (Local Storage):-");
+  // console.log(req.file);
+  console.log("log> req.file (Memory Storage):-\n", {
+    fieldname: req.file?.fieldname,
+    originalname: req.file?.originalname,
+    mimetype: req.file?.mimetype,
+    size: req.file?.size,
+    bufferExists: !!req.file?.buffer, // Confirms buffer is present for Cloudinary
+  });
   console.log("log> req.body:-");
   console.log(req.body);
 
@@ -53,10 +60,12 @@ const createComment = async (req, res, next) => {
   const { text } = req.body;
   const userId = req.userData.userId;
   const postId = req.params.postId;
-  const imageLocalPath = req.file?.path;
+  // const imageLocalPath = req.file?.path; // for local storage i.e `uploads` directory
+  const imageBuffer = req.file?.buffer; // for memory storage, here vercel
 
-  if (!text && !imageLocalPath) {
-    // if (!text && !image) {
+  // if (!text && !image) {
+  // if (!text && !imageLocalPath) {
+  if (!text && !imageBuffer) {
     const error = new ApiError(
       "Comment must have either text or image - comments.controller.js - createComment()"
     );
@@ -65,17 +74,20 @@ const createComment = async (req, res, next) => {
   }
 
   let type = "text";
-  if (text && imageLocalPath) type = "mixed";
-  else if (imageLocalPath) type = "image";
   // if (text && image) type = "mixed";
+  // if (text && imageLocalPath) type = "mixed";
+  if (text && imageBuffer) type = "mixed";
   // else if (image) type = "image";
+  // else if (imageLocalPath) type = "image";
+  else if (imageBuffer) type = "image";
 
   // uploading image on cloudinary to get image url before saving it in db ->
   let imageUrl;
 
   if (type === "mixed" || type === "image") {
     try {
-      let imageRes = await uploadOnCloudinary(imageLocalPath);
+      // let imageRes = await uploadOnCloudinary(imageLocalPath);
+      let imageRes = await uploadOnCloudinary(imageBuffer);
       // console.log("log> imageRes:-\n", imageRes);
       if (imageRes?.secure_url) imageUrl = imageRes.secure_url;
     } catch (err) {

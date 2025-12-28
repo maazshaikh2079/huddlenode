@@ -9,8 +9,9 @@ import {
   editComment,
   deleteComment,
 } from "../controllers/comments.controller.js";
-import { fileUpload } from "../middlewares/file-upload.middleware.js";
-import { verifyJwt } from "../middlewares/check-auth.middleware.js";
+// import { fileUpload } from "../middlewares/file-upload-local.js";
+import { fileUpload } from "../middlewares/file-upload.js";
+import { verifyJwt } from "../middlewares/check-auth.js";
 
 const router = Router();
 
@@ -22,7 +23,7 @@ router.use(verifyJwt);
 
 router.post(
   "/post/:postId",
-  fileUpload.single("image"), // req.file
+  fileUpload.single("image"), // req.file for local | req.file.buffer for vercel
   createComment
 );
 
@@ -32,7 +33,7 @@ router.patch(
   "/:commentId",
   [
     // req.body
-    check("text").trim().notEmpty(),
+    check("text").trim().notEmpty().withMessage("Comment text cannot be empty"),
   ],
   editComment
 );

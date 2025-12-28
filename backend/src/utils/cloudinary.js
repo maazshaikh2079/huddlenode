@@ -1,8 +1,15 @@
+/**
+ * NOTE: This file is optimized for Vercel's Serverless environment.
+ * Strategy: Memory Storage (Buffers).
+ * * Reason: Vercel uses a Read-Only and Stateless file system, which prevents
+ * saving temporary files to a local 'uploads' directory. This version uploads
+ * image data directly from memory (RAM) to Cloudinary to avoid ENOENT errors.
+ */
+
 import dotenv from "dotenv";
 dotenv.config();
 
 import { v2 as cloudinary } from "cloudinary";
-import fs from "fs";
 import { ApiError } from "./ApiError.js";
 
 cloudinary.config({
@@ -11,82 +18,59 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async (imageFileLocalPath) => {
-  if (!imageFileLocalPath) {
-    const error = new ApiError(
-      "`imageFileLocalPath` is not present - cloudinary.js - uploadOnCloudinary()",
-      400 // correct this code
-    );
-    console.log(`log> Error: ${error.message}`);
-
-    throw error;
+/**
+ * @description Uploads a file buffer directly to Cloudinary (Serverless Compatible)
+ * @param {Buffer} fileBuffer - The file data from req.file.buffer
+ */
+const uploadOnCloudinary = async (fileBuffer) => {
+  if (!fileBuffer) {
+    throw new ApiError("No file buffer provided for upload.", 400);
   }
 
-  try {
-    // upload the file on cloudinary
-    const response = await cloudinary.uploader.upload(imageFileLocalPath, {
-      resource_type: "auto",
-    });
-
-    // file has been uploaded successfully
-    console.log("log> Image file is uploaded on cloudinary successfully.");
-    console.log("log> URL:", response.url);
-    console.log("log> response:-");
-    console.log(response);
-
-    // removing the locally saved temporary file synchronously as the upload operation succeeded
-    fs.unlinkSync(imageFileLocalPath);
-    console.log(
-      "log> Removed the locally saved temporary image file synchronously as the upload operation succeeded - cloudinary.js - uploadOnCloudinary()"
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { resource_type: "auto" },
+      (error, result) => {
+        if (error) {
+          console.error("log> Cloudinary Upload Error:", error);
+          return reject(
+            new ApiError(`Cloudinary upload failed: ${error.message}`, 500)
+          );
+        }
+        console.log(
+          "log> Image uploaded to Cloudinary successfully:",
+          result.secure_url
+        );
+        resolve(result);
+      }
     );
 
-    return response;
-  } catch (err) {
-    const error = new ApiError(
-      `Something went wrong uploadOnCloudinary FAILED!!!\nError: ${err} - cloudinary.js - uploadOnCloudinary()`,
-      400 // correct this code
-    );
-
-    console.log(`log> Error: ${error.message}`);
-
-    // removing the locally saved temporary file synchronously as the upload operation got failed
-    fs.unlinkSync(imageFileLocalPath);
-    console.log(
-      "log> Removed the locally saved temporary image file synchronously as the upload operation got failed - cloudinary.js - uploadOnCloudinary()"
-    );
-
-    throw error;
-  }
+    // Write the buffer to the stream
+    uploadStream.end(fileBuffer);
+  });
 };
 
 const deleteFromCloudinary = async (imageUrl) => {
-  let imageUrlArray = imageUrl.split("/");
-  let imageFilename = imageUrlArray[imageUrlArray.length - 1]; // "tklrxe042qhb5kmu1n9n.jpg"
-  const imageId = imageFilename.split(".")[0]; // "tklrxe042qhb5kmu1n9n"
-  console.log("imageId:", imageId);
-
-  if (!imageId) {
-    const error = new ApiError(
-      "Cloud not get imageId from imageUrl - cloudinary.js - deleteFromCloudinary()",
-      400 // correct this code
-    );
-    console.log(`log> Error: ${error.message}`);
-
-    throw error;
+  if (!imageUrl) {
+    throw new ApiError("No imageUrl provided for delete.", 400);
   }
 
   try {
+    let imageUrlArray = imageUrl.split("/");
+    let imageFilename = imageUrlArray[imageUrlArray.length - 1]; // "tklrxe042qhb5kmu1n9n.jpg"
+    const imageId = imageFilename.split(".")[0]; // "tklrxe042qhb5kmu1n9n"
+    console.log("imageId:", imageId);
+
+    if (!imageId) {
+      throw new ApiError("Could not extract public imageId from URL", 400);
+    }
+
     const response = await cloudinary.uploader.destroy(imageId);
     console.log("log> Cloudinary image deleted:", response);
     return response;
   } catch (err) {
-    const error = new ApiError(
-      `Something went wrong! failed to delete image from Cloudinary\nError: ${err} - cloudinary.js - deleteFromCloudinary()`,
-      400 // correct this code
-    );
-    console.log(`log> Error: ${error.message}`);
-
-    throw error;
+    console.error("log> Cloudinary Delete Error:", err.message);
+    throw new ApiError(`Failed to delete image: ${err.message}`, 500);
   }
 };
 

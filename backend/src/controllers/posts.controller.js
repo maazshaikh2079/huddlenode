@@ -10,7 +10,7 @@ import { ApiError } from "../utils/ApiError.js";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
-} from "../utils/cloudinary.js";
+} from "../utils/cloudinary-local.js";
 
 const getAllPosts = async (req, res, next) => {
   console.log("log> GET req in `/posts`");
@@ -90,8 +90,15 @@ const createPost = async (req, res, next) => {
     );
   }
 
-  console.log("log> req.file:-");
-  console.log(req.file);
+  // console.log("log> req.file (Local Storage):-");
+  // console.log(req.file);
+  console.log("log> req.file (Memory Storage):-\n", {
+    fieldname: req.file?.fieldname,
+    originalname: req.file?.originalname,
+    mimetype: req.file?.mimetype,
+    size: req.file?.size,
+    bufferExists: !!req.file?.buffer, // Confirms buffer is present for Cloudinary
+  });
   console.log("log> req.body:-");
   console.log(req.body);
 
@@ -101,11 +108,12 @@ const createPost = async (req, res, next) => {
   const forumId = req.params.forumId;
 
   // uploading image on cloudinary to get image url before saving it in db ->
-
-  const imageLocalPath = req.file?.path;
+  // const imageLocalPath = req.file?.path; // for local storage i.e `uploads` directory
+  const imageBuffer = req.file?.buffer; // for memory storage, here vercel
   let imageUrl;
 
-  if (imageLocalPath) {
+  // if (imageLocalPath) {
+  if (imageBuffer) {
     try {
       const imageRes = await uploadOnCloudinary(imageLocalPath);
       // console.log("log> imageRes:-\n", imageRes);
@@ -359,8 +367,15 @@ const editPostTexts = async (req, res, next) => {
 const editPostImage = async (req, res, next) => {
   console.log("PATCH req in `/:postId/edit/image`");
 
-  console.log("log> req.file:-");
-  console.log(req.file);
+  // console.log("log> req.file (Local Storage):-");
+  // console.log(req.file);
+  console.log("log> req.file (Memory Storage):-\n", {
+    fieldname: req.file?.fieldname,
+    originalname: req.file?.originalname,
+    mimetype: req.file?.mimetype,
+    size: req.file?.size,
+    bufferExists: !!req.file?.buffer, // Confirms buffer is present for Cloudinary
+  });
   console.log("log> req.body:-");
   console.log(req.body);
 
@@ -412,10 +427,12 @@ const editPostImage = async (req, res, next) => {
   }
 
   // uploading image on cloudinary to get image url before saving it in db ->
-  const imageLocalPath = req.file?.path;
-  if (!imageLocalPath) {
+  // const imageLocalPath = req.file?.path; // for local storage i.e `uploads` directory
+  const imageBuffer = req.file?.buffer; // for memory storage, here vercel
+  if (!imageBuffer) {
     const error = new ApiError(
-      "Post image file is missing locally! - forums.controller.js - editForumCoverImage()",
+      // "Post image file is missing locally! - forums.controller.js - editForumCoverImage()",
+      "Post image file buffer is not present in memory! - forums.controller.js - editForumCoverImage()",
       400
     );
     console.log("log> Error: ", error.message);

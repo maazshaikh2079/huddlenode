@@ -9,8 +9,9 @@ import {
   editUsername,
   editUsersPfp,
 } from "../controllers/users.controller.js";
-import { fileUpload } from "../middlewares/file-upload.middleware.js";
-import { verifyJwt } from "../middlewares/check-auth.middleware.js";
+// import { fileUpload } from "../middlewares/file-upload-local.js";
+import { fileUpload } from "../middlewares/file-upload.js";
+import { verifyJwt } from "../middlewares/check-auth.js";
 
 const router = Router();
 
@@ -22,9 +23,14 @@ router.post(
   "/signup",
   fileUpload.single("pfp"),
   [
-    check("username").not().isEmpty(),
-    check("email").normalizeEmail().isEmail(),
-    check("password").isLength({ min: 8 }),
+    check("username").not().isEmpty().withMessage("Username is required"),
+    check("email")
+      .normalizeEmail()
+      .isEmail()
+      .withMessage("Please provide a valid email"),
+    check("password")
+      .isLength({ min: 8 })
+      .withMessage("Password must be at least 8 characters long"),
   ],
   signupUser
 );
@@ -42,18 +48,11 @@ router.use(verifyJwt);
 
 router.patch(
   "/edit/username",
-  [check("username").not().isEmpty()],
+  [check("username").not().isEmpty().withMessage("Username cannot be empty")],
   editUsername
 );
 
 router.patch("/edit/pfp", fileUpload.single("pfp"), editUsersPfp);
 // router.patch("/edit/pfp", editUsersPfp);
-
-// router.patch(
-//   "/edit/pfp",
-//   verifyJwt,           // 1. Check if user is logged in
-//   fileUpload.single("pfp"), // 2. Multer parses the file and any body fields
-//   editUsersPfp         // 3. Your controller logic
-// );
 
 export default router;

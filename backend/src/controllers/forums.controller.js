@@ -10,7 +10,7 @@ import { ApiError } from "../utils/ApiError.js";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
-} from "../utils/cloudinary.js";
+} from "../utils/cloudinary-local.js";
 
 const getAllForums = async (req, res, next) => {
   console.log("log> GET req in `/forums`");
@@ -88,8 +88,15 @@ const createForum = async (req, res, next) => {
     );
   }
 
-  console.log("log> req.file:-");
-  console.log(req.file);
+  // console.log("log> req.file (Local Storage):-");
+  // console.log(req.file);
+  console.log("log> req.file (Memory Storage):-\n", {
+    fieldname: req.file?.fieldname,
+    originalname: req.file?.originalname,
+    mimetype: req.file?.mimetype,
+    size: req.file?.size,
+    bufferExists: !!req.file?.buffer, // Confirms buffer is present for Cloudinary
+  });
   console.log("log> req.body:-");
   console.log(req.body);
 
@@ -98,12 +105,15 @@ const createForum = async (req, res, next) => {
   const userId = req.userData.userId;
 
   // uploading cover image on cloudinary to get image url before saving it in db ->
-  const coverImageLocalPath = req.file?.path;
+  // let coverImageLocalPath = req.file?.path; // for local storage i.e `uploads` directory
+  let coverImageBuffer = req.file?.buffer; // for memory storage, here vercel
   let coverImageUrl;
 
-  if (coverImageLocalPath) {
+  // if (coverImageLocalPath) {
+  if (coverImageBuffer) {
     try {
-      const coverImageRes = await uploadOnCloudinary(coverImageLocalPath);
+      // const coverImageRes = await uploadOnCloudinary(coverImageLocalPath);
+      const coverImageRes = await uploadOnCloudinary(coverImageBuffer);
       // console.log("log> coverImageRes:-\n", coverImageRes);
       if (coverImageRes?.secure_url) coverImageUrl = coverImageRes.secure_url;
     } catch (err) {
@@ -293,8 +303,15 @@ const editForumTexts = async (req, res, next) => {
 const editForumCoverImage = async (req, res, next) => {
   console.log("PATCH req in `/forums/:forumId/edit/cover-image`");
 
-  console.log("log> req.file:-");
-  console.log(req.file);
+  // console.log("log> req.file (Local Storage):-");
+  // console.log(req.file);
+  console.log("log> req.file (Memory Storage):-\n", {
+    fieldname: req.file?.fieldname,
+    originalname: req.file?.originalname,
+    mimetype: req.file?.mimetype,
+    size: req.file?.size,
+    bufferExists: !!req.file?.buffer, // Confirms buffer is present for Cloudinary
+  });
   console.log("log> req.body:-");
   console.log(req.body);
 
@@ -337,10 +354,13 @@ const editForumCoverImage = async (req, res, next) => {
   }
 
   // uploading cover image on cloudinary to get cover image url before saving it in db ->
-  const coverImageLocalPath = req.file?.path;
-  if (!coverImageLocalPath) {
+  // let coverImageLocalPath = req.file?.path; // for local storage i.e `uploads` directory
+  let coverImageBuffer = req.file?.buffer; // for memory storage, here vercel
+  // if (!coverImageLocalPath) {
+  if (!coverImageBuffer) {
     const error = new ApiError(
-      "CoverImage file is missing locally! - forums.controller.js - editForumCoverImage()",
+      // "coverImage file is missing locally! - forums.controller.js - editForumCoverImage()",
+      "coverImage file buffer is not present in memory! - forums.controller.js - editForumCoverImage()",
       400
     );
     console.log("log> Error: ", error.message);

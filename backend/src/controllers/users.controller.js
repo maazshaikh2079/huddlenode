@@ -8,7 +8,7 @@ import { User } from "../models/user.model.js";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
-} from "../utils/cloudinary.js";
+} from "../utils/cloudinary-local.js";
 
 const getAllUsers = async (req, res, next) => {
   console.log("log> GET req in `/users`");
@@ -117,8 +117,15 @@ const signupUser = async (req, res, next) => {
     );
   }
 
-  console.log("log> req.file:-");
-  console.log(req.file);
+  // console.log("log> req.file (Local Storage):-");
+  // console.log(req.file);
+  console.log("log> req.file (Memory Storage):-\n", {
+    fieldname: req.file?.fieldname,
+    originalname: req.file?.originalname,
+    mimetype: req.file?.mimetype,
+    size: req.file?.size,
+    bufferExists: !!req.file?.buffer, // Confirms buffer is present for Cloudinary
+  });
   console.log("log> req.body:-");
   console.log(req.body);
 
@@ -162,12 +169,15 @@ const signupUser = async (req, res, next) => {
   }
 
   // uploading image on cloudinary to get image url before saving it in db ->
-  let pfpLocalPath = req.file?.path;
+  // let pfpLocalPath = req.file?.path; // for local storage i.e `uploads` directory
+  let pfpBuffer = req.file?.buffer; // for memory storage, here vercel
   let pfpUrl;
 
-  if (pfpLocalPath) {
+  // if (pfpLocalPath) {
+  if (pfpBuffer) {
     try {
-      const pfpRes = await uploadOnCloudinary(pfpLocalPath);
+      // const pfpRes = await uploadOnCloudinary(pfpLocalPath);
+      const pfpRes = await uploadOnCloudinary(pfpBuffer);
       // console.log("log> pfpRes:-\n", pfpRes);
       if (pfpRes?.secure_url) pfpUrl = pfpRes.secure_url;
     } catch (err) {
@@ -381,8 +391,15 @@ const editUsersPfp = async (req, res, next) => {
   // 1. Securely get userId from JWT middleware
   const userId = req.userData.userId;
 
-  console.log("log> req.file:-");
-  console.log(req.file);
+  // console.log("log> req.file (Local Storage):-");
+  // console.log(req.file);
+  console.log("log> req.file (Memory Storage):-\n", {
+    fieldname: req.file?.fieldname,
+    originalname: req.file?.originalname,
+    mimetype: req.file?.mimetype,
+    size: req.file?.size,
+    bufferExists: !!req.file?.buffer, // Confirms buffer is present for Cloudinary
+  });
   console.log("log> req.body:-");
   console.log(req.body);
 
@@ -412,14 +429,18 @@ const editUsersPfp = async (req, res, next) => {
   }
 
   // 3. Securely check for local file path from Multer
-  const pfpLocalPath = req.file?.path;
-  if (!pfpLocalPath) {
+  // let pfpLocalPath = req.file?.path; // for local storage i.e `uploads` directory
+  let pfpBuffer = req.file?.buffer; // for memory storage, here vercel
+  // if (!pfpLocalPath) {
+  if (!pfpBuffer) {
     const error = new ApiError(
-      "PfP file is missing locally! - users.controller.js - editUsersPfp()",
+      // "PfP file is missing locally! - users.controller.js - editUsersPfp()",
+      "PfP file buffer is not present in memory! - users.controller.js - editUsersPfp()",
       400
     );
     console.log(
-      "log> Error: PfP file is missing locally! - users.controller.js - editUsersPfp()"
+      // "log> Error: PfP file is missing locally! - users.controller.js - editUsersPfp()"
+      "log> Error: PfP file buffer is not present in memory! - users.controller.js - editUsersPfp()"
     );
     return next(error);
   }
@@ -427,7 +448,8 @@ const editUsersPfp = async (req, res, next) => {
   // Handle Cloudinary Upload, URL formatting, DB Saving, and Cloudinary Deletion in one block
   try {
     // 4. Uploading new pfp on cloudinary
-    const newPfpRes = await uploadOnCloudinary(pfpLocalPath);
+    // const newPfpRes = await uploadOnCloudinary(pfpLocalPath);
+    const newPfpRes = await uploadOnCloudinary(pfpBuffer);
     console.log("log> newPfpRes:-");
     console.log(newPfpRes);
 

@@ -11,8 +11,10 @@ import {
   editPostImage,
   deletePost,
 } from "../controllers/posts.controller.js";
-import { fileUpload } from "../middlewares/file-upload.middleware.js";
-import { verifyJwt } from "../middlewares/check-auth.middleware.js";
+
+// import { fileUpload } from "../middlewares/file-upload-local.js";
+import { fileUpload } from "../middlewares/file-upload.js";
+import { verifyJwt } from "../middlewares/check-auth.js";
 
 const router = Router();
 
@@ -28,11 +30,10 @@ router.use(verifyJwt);
 
 router.post(
   "/forum/:forumId",
-  fileUpload.single("image"), // req.file
+  fileUpload.single("image"), // req.file for local | req.file.buffer for vercel
   [
     // req.body
-    check("title").not().isEmpty(),
-    // check("content").isLength({ min: 5 }),
+    check("title").not().isEmpty().withMessage("Post title is required"),
   ],
   createPost
 );
@@ -41,14 +42,14 @@ router.patch(
   "/:postId/edit/texts",
   [
     // req.body
-    check("title").not().isEmpty(),
+    check("title").not().isEmpty().withMessage("Title cannot be empty"),
   ],
   editPostTexts
 );
 
 router.patch(
   "/:postId/edit/image",
-  fileUpload.single("image"), // req.file
+  fileUpload.single("image"), // req.file for local | req.file.buffer for vercel
   editPostImage
 );
 
