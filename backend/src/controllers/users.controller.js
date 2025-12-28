@@ -8,7 +8,8 @@ import { User } from "../models/user.model.js";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
-} from "../utils/cloudinary-local.js";
+} from "../utils/cloudinary.js";
+// } from "../utils/cloudinary-local.js";
 
 const getAllUsers = async (req, res, next) => {
   console.log("log> GET req in `/users`");

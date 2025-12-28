@@ -10,7 +10,8 @@ import { ApiError } from "../utils/ApiError.js";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
-} from "../utils/cloudinary-local.js";
+} from "../utils/cloudinary.js";
+// } from "../utils/cloudinary-local.js";
 
 const getAllPosts = async (req, res, next) => {
   console.log("log> GET req in `/posts`");
