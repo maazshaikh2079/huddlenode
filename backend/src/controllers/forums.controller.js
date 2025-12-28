@@ -371,7 +371,8 @@ const editForumCoverImage = async (req, res, next) => {
   // Handle Cloudinary Upload, URL formatting, DB Saving, and Cloudinary Deletion in one block
   try {
     // Uploading new pfp on cloudinary
-    const newCoverImageRes = await uploadOnCloudinary(coverImageLocalPath);
+    // const newCoverImageRes = await uploadOnCloudinary(coverImageLocalPath);
+    const newCoverImageRes = await uploadOnCloudinary(coverImageBuffer);
     console.log("log> newCoverImageRes:-");
     console.log(newCoverImageRes);
 
