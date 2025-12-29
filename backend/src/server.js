@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import fs from "fs";
-import path from "path";
 
 import express from "express";
 import mongoose from "mongoose";
@@ -22,7 +21,7 @@ app.use((req, res, next) => {
 
   // const allowedOrigins = [
   //   "http://localhost:5173",
-  //   "https://your-frontend-link.vercel.app",
+  //   "https://frontend-link.app",
   // ];
   // const origin = req.headers.origin;
   // if (allowedOrigins.includes(origin)) {
@@ -57,8 +56,6 @@ async function connectDB() {
 
   try {
     const db = await mongoose.connect(dbUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       connectTimeoutMS: 10000,
       socketTimeoutMS: 45000,
     });
@@ -103,21 +100,11 @@ app.use("/api/comments", commentRouter);
 // Local Listener
 if (!process.env.VERCEL) {
   const PORT = process.env.PORT || 5000;
-  mongoose
-    .connect(
-      `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.g9wuk9q.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority&appName=Cluster0`
-    )
-    .then(() =>
-      app.listen(PORT, () => {
-        console.log(`log> Local server running on PORT:${PORT}`);
-        console.log(`log> Health Check: http://localhost:${PORT}/`);
-      })
-    )
-    .catch((error) => {
-      console.log("log> MongoDB connection FAILED!!!");
-      console.log("log> Error:-");
-      console.error(error);
-    });
+
+  app.listen(PORT, () => {
+    console.log(`log> Local server running on PORT:${PORT}`);
+    console.log(`log> Health Check: http://localhost:${PORT}/`);
+  });
 }
 
 // Error handling:-
