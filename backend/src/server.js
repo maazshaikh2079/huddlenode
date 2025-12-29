@@ -1,3 +1,13 @@
+/**
+ * NOTE: This is the main entry point optimized for VERCEL DEPLOYMENT.
+ * Strategy: Hybrid Serverless-Friendly Architecture.
+ * * Reason: Vercel executes code as Serverless Functions. This file includes:
+ * 1. Global DB middleware to ensure MongoDB connectivity during cold starts.
+ * 2. Conditional 'app.listen()' to allow local development only when
+ * 'process.env.VERCEL' is not present.
+ * 3. Stateless request handling to maintain reliability across ephemeral instances.
+ */
+
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -82,7 +92,14 @@ app.use(async (req, res, next) => {
 });
 
 // BASIC route
-app.get("/", (_, res) => res.send("<h1>Server started</h1>"));
+app.get("/", (_, res) =>
+  res.send(`
+    <title>HuddleNode-Server</title>
+    <body style="background: #121212; font-family: sans-serif">
+      <h1 style='color: #5f6fff'>HuddleNode Backend Server</h1>
+    <body>
+    `)
+);
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
 // routes import

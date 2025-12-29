@@ -1,3 +1,12 @@
+/**
+ * NOTE: This is a backup/dummy file for LOCAL DEVELOPMENT ONLY.
+ * Strategy: Disk Storage (File System).
+ * * Reason: This version attempts to write files to the 'uploads/images'
+ * directory. This will fail on Vercel due to its
+ * Read-Only and Stateless file system, leading to 'ENOENT' errors.
+ * Use this ONLY for local testing where a persistent 'uploads' folder exists.
+ */
+
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 

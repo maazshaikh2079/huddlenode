@@ -1,9 +1,10 @@
 /**
  * NOTE: This middleware is optimized for Vercel's Serverless environment.
- * Strategy: Memory Storage.
- * * Reason: Vercel's file system is Read-Only. Using 'multer.memoryStorage()'
- * allows us to receive the file as a Buffer (req.file.buffer) which is then
- * streamed directly to Cloudinary, avoiding 'ENOENT' directory errors.
+ * Strategy: Memory Storage (Buffers).
+ * * Reason: Vercel uses a Read-Only and Stateless file system, which prevents
+ * saving temporary files to a local 'uploads' directory. This version provides
+ * the file as 'req.file.buffer', allowing 'cloudinary.js' to stream the data
+ * directly to the cloud and avoid 'ENOENT' errors.
  */
 
 import multer from "multer";

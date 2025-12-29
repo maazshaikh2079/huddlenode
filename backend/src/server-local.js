@@ -1,4 +1,11 @@
-// Note: This code file is kept as sample code for running server locally
+/**
+ * NOTE: This is a sample code file for running the server LOCALLY (Persistent Server).
+ * * Strategy: Traditional app.listen() with immediate Mongoose connection.
+ * * Reason: This setup is ideal for local development on your machine where
+ * the process stays running. It uses local file path cleanup and standard
+ * port listening (http://localhost:5000), which differs from the
+ * stateless/serverless logic required for Vercel deployment.
+ */
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -22,17 +29,6 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*"); // Allow all origins
 
-  // const allowedOrigins = [
-  //   "http://localhost:5173",
-  //   "https://your-frontend-link.vercel.app",
-  // ];
-  // const origin = req.headers.origin;
-  // if (allowedOrigins.includes(origin)) {
-  //   res.setHeader("Access-Control-Allow-Origin", origin);
-  // } else {
-  //   res.setHeader("Access-Control-Allow-Origin", "*");
-  // }
-
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
@@ -53,8 +49,14 @@ app.use((req, res, next) => {
 // app.use("/uploads/images", express.static(path.join("uploads", "images")));
 
 // Test route
-app.get("/", (_, res) => res.send("<h1>Server started</h1>"));
-app.get("/favicon.ico", (req, res) => res.status(204).end());
+app.get("/", (_, res) =>
+  res.send(`
+    <title>HuddleNode-Server</title>
+    <body style="background: #121212; font-family: sans-serif">
+      <h1 style='color: #5f6fff'>HuddleNode's local server started!</h1>
+    <body>
+    `)
+);
 
 // routes import
 import userRouter from "./routes/users.routes.js";

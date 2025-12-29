@@ -1,9 +1,11 @@
 /**
  * NOTE: This file is optimized for Vercel's Serverless environment.
- * Strategy: Memory Storage (Buffers).
+ * Strategy: Memory Storage (Buffers) & Streaming Upload.
  * * Reason: Vercel uses a Read-Only and Stateless file system, which prevents
- * saving temporary files to a local 'uploads' directory. This version uploads
- * image data directly from memory (RAM) to Cloudinary to avoid ENOENT errors.
+ * saving temporary files to a local 'uploads' directory.
+ * This version uses 'cloudinary.uploader.upload_stream' to send image data
+ * directly from RAM (req.file.buffer) to the cloud, bypassing the disk
+ * entirely to avoid 'ENOENT' errors.
  */
 
 import dotenv from "dotenv";

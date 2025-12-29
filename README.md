@@ -2,6 +2,9 @@
 
 **HuddleNode** is a modern community forum platform built on the MERN stack. It empowers users to engage in structured discussions through specialized forums and nested posts while providing the unique ability to participate **anonymously**, ensuring a safe space for every voice.
 
+## 🚀 Live Demo
+* **Frontend**: https://huddlenode.vercel.app
+* **Backend API**: https://huddlenode-be.vercel.app
 
 ## 🚀 Features
 
@@ -48,7 +51,7 @@ server/                # Express Backend
 
 ```
 
-## 🚦 Getting Started
+## 🚦 Getting Started (Local Development)
 
 ### Prerequisites
 
@@ -73,7 +76,7 @@ cd ../frontend && npm install
 3. **Launch**
 ```bash
 # Server (from /backend)
-npm start
+npm run dev
 # Client (from /frontend)
 npm run dev
 
@@ -83,6 +86,9 @@ npm run dev
 ## 🛡️ API Overview
 
 HuddleNode provides a robust RESTful API. All routes requiring authentication expect a valid JWT in the `Authorization: Bearer <TOKEN>` header.
+
+All production requests should be sent to: `https://huddlenode-be.vercel.app` <br>
+All local devlopment requests should be sent to: `https://localhost:5000` (any other port of your choice)
 
 ### **1. Authentication & Users** (`/api/users`)
 
@@ -132,6 +138,9 @@ HuddleNode provides a robust RESTful API. All routes requiring authentication ex
 ## 🧪 Testing the API
 
 You can test these endpoints using `curl` or by importing them into Postman. Replace `<TOKEN>` with the JWT received after a successful login or signup.
+
+All production requests should be sent to: `https://huddlenode-be.vercel.app` <br>
+All local devlopment requests should be sent to: `https://localhost:5000` (any other port of your choice)
 
 ### **1. User Authentication**
 
@@ -240,13 +249,16 @@ curl -X PATCH http://localhost:5000/api/comments/:commentId \
 
 ## 🚀 Testing with Postman
 
+All production requests should be sent to: `https://huddlenode-be.vercel.app` <br>
+All local devlopment requests should be sent to: `http://localhost:5000` (any other port of your choice)
+
 ### 1. Set Up Your Environment
 
 To avoid re-typing URLs and tokens, create a new **Environment** in Postman and add these variables:
 
 | Variable | Initial Value |
 | --- | --- |
-| `base_url` | `http://localhost:5000/api` |
+| `base_url` | `http://localhost:5000` |
 | `token` | *(Leave empty - will be set after Login/Signup)* |
 
 
@@ -260,7 +272,7 @@ You can copy this block, save it as `HuddleNode.postman_environment.json`, and i
   "values": [
     {
       "key": "base_url",
-      "value": "http://localhost:5000/api",
+      "value": "http://localhost:5000",
       "type": "default",
       "enabled": true
     },
@@ -283,12 +295,12 @@ You can copy this block, save it as `HuddleNode.postman_environment.json`, and i
 
 #### **Authentication (No Token Required)**
 
-* **Signup (`POST {{base_url}}/users/signup`)**
+* **Signup (`POST {{base_url}}/api/users/signup`)**
 * **Body**: Select `form-data`.
 * **Keys**: `username`, `email`, `password`, and `pfp` (change type to **File** for pfp).
 
 
-* **Login (`POST {{base_url}}/users/login`)**
+* **Login (`POST {{base_url}}/api/users/login`)**
 * **Body**: Select `raw` -> `JSON`.
 * **Content**: `{"email": "user@example.com", "password": "password123"}`.
 
@@ -309,12 +321,12 @@ You can copy this block, save it as `HuddleNode.postman_environment.json`, and i
 
 #### **Forums (Token Required for Writes)**
 
-* **Create Forum (`POST {{base_url}}/forums/`)**
+* **Create Forum (`POST {{base_url}}/api/forums/`)**
 * **Headers**: `Authorization`: `Bearer {{token}}`.
 * **Body**: `form-data` with `title`, `description`, and `coverImage` (File).
 
 
-* **Edit Texts (`PATCH {{base_url}}/forums/:forumId/edit/texts`)**
+* **Edit Texts (`PATCH {{base_url}}/api/forums/:forumId/edit/texts`)**
 * **Body**: `raw` -> `JSON`.
 * **Content**: `{"title": "New Title", "description": "New description"}`.
 
@@ -324,12 +336,12 @@ You can copy this block, save it as `HuddleNode.postman_environment.json`, and i
 
 #### **Posts & Comments (Token Required for Writes)**
 
-* **Create Post (`POST {{base_url}}/posts/forum/:forumId`)**
+* **Create Post (`POST {{base_url}}/api/posts/forum/:forumId`)**
 * **Headers**: `Authorization`: `Bearer {{token}}`.
 * **Body**: `form-data` with `title`, `content`, and `image` (File).
 
 
-* **Add Comment (`POST {{base_url}}/comments/post/:postId`)**
+* **Add Comment (`POST {{base_url}}/api/comments/post/:postId`)**
 * **Headers**: `Authorization`: `Bearer {{token}}`.
 * **Body**: `form-data` with `text` and optional `image` (File).
 
@@ -361,7 +373,7 @@ You can save the block below as `HuddleNode.postman_collection.json` and import 
 							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}",
 							"options": { "json": { "language": "json" } }
 						},
-						"url": { "raw": "{{base_url}}/users/login" }
+						"url": { "raw": "{{base_url}}/api/users/login" }
 					}
 				}
 			]
@@ -373,7 +385,7 @@ You can save the block below as `HuddleNode.postman_collection.json` and import 
 					"name": "Get All Forums",
 					"request": {
 						"method": "GET",
-						"url": { "raw": "{{base_url}}/forums" }
+						"url": { "raw": "{{base_url}}/api/forums" }
 					}
 				}
 			]

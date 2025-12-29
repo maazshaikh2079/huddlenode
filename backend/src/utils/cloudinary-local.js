@@ -1,7 +1,10 @@
-/** * NOTE: This is a backup/dummy file for LOCAL DEVELOPMENT ONLY.
- * It uses the Disk Storage strategy (req.file.path).
- * * DO NOT use this file for Vercel deployment as it relies on a local 'uploads'
- * directory, which is incompatible with Vercel's Read-Only and Stateless system.
+/**
+ * NOTE: This is a backup/dummy file for LOCAL DEVELOPMENT ONLY.
+ * Strategy: Disk Storage (File Paths).
+ * * Reason: This version uses 'cloudinary.uploader.upload' which requires a
+ * physical file path ('imageFileLocalPath') to exist in the 'uploads' directory.
+ * This strategy is incompatible with Vercel's Read-Only and Stateless system
+ * and will cause 'ENOENT' errors in production.
  */
 
 import dotenv from "dotenv";
