@@ -183,9 +183,9 @@ const ForumDetails = () => {
         <div
           className={`${auth.userId === forum.creator ? "bg-[#d4d9ff]/25" : "bg-white"} rounded-xl border border-zinc-300 overflow-hidden flex flex-col md:flex-row shadow-sm min-h-[300px] relative`}
         >
-          {/* COVER IMAGE SECTION */}
+          {/* COVER IMAGE SECTION - UPDATED TO MATCH POSTDETAILS */}
           <div
-            className={`${auth.userId === forum.creator ? "bg-[#d4d9ff]/26" : "bg-zinc-50"} md:w-5/12 flex items-center justify-center p-8 border-b md:border-b-0 md:border-r border-zinc-300 relative`}
+            className={`${auth.userId === forum.creator ? "bg-[#d4d9ff]/26" : "bg-zinc-50"} md:w-1/3 flex items-center justify-center p-4 md:p-6 border-b md:border-b-0 md:border-r border-zinc-300 relative`}
           >
             {auth.userId === forum.creator && (
               <input
@@ -201,7 +201,7 @@ const ForumDetails = () => {
             )}
 
             <div
-              className={`relative w-full h-full max-h-[250px] rounded-lg overflow-hidden group ${auth.userId === forum.creator ? "cursor-pointer" : ""}`}
+              className={`relative w-full h-48 md:h-full rounded-lg overflow-hidden group ${auth.userId === forum.creator ? "cursor-pointer" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
                 if (auth.userId === forum.creator && !isUpdatingImage)
@@ -212,11 +212,11 @@ const ForumDetails = () => {
                 <img
                   src={forum.coverImage}
                   alt={forum.title}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="text-zinc-400 text-center italic w-full h-full flex items-center justify-center bg-zinc-100">
-                  <p className="text-lg">No forum cover image</p>
+                  <p className="text-sm md:text-lg">No forum cover image</p>
                 </div>
               )}
 
@@ -225,9 +225,9 @@ const ForumDetails = () => {
                   className={`absolute inset-0 bg-black/25 flex items-center justify-center transition-opacity ${isUpdatingImage ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                 >
                   {isUpdatingImage ? (
-                    <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 md:w-10 md:h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
-                    <RiImageEditFill className="text-white text-4xl drop-shadow-lg" />
+                    <RiImageEditFill className="text-white text-3xl md:text-4xl drop-shadow-lg" />
                   )}
                 </div>
               )}
@@ -235,17 +235,17 @@ const ForumDetails = () => {
 
             {auth.userId === forum.creator && showImageMenu && (
               <div
-                className="absolute left-[50%] -translate-x-1/2 md:left-[80%] top-1/4 z-50"
+                className="absolute left-[50%] -translate-x-1/2 md:left-[85%] md:translate-x-0 top-1/4 z-50"
                 ref={imageMenuRef}
               >
-                <div className="bg-white text-zinc-800 w-52 rounded-lg shadow-2xl py-2 border border-zinc-100 animate-in fade-in zoom-in duration-200">
+                <div className="bg-white text-zinc-800 w-44 md:w-52 rounded-lg shadow-2xl py-2 border border-zinc-100 animate-in fade-in zoom-in duration-200">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       fileInputRef.current.click();
                       setShowImageMenu(false);
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-zinc-50 transition-colors flex items-center gap-3 font-semibold text-zinc-700 text-sm whitespace-nowrap"
+                    className="w-full text-left px-4 py-2 hover:bg-zinc-50 transition-colors flex items-center gap-3 font-semibold text-zinc-700 text-xs md:text-sm whitespace-nowrap"
                   >
                     <RiImageEditFill className="text-zinc-500 text-base" />
                     Change Cover Image
@@ -255,7 +255,7 @@ const ForumDetails = () => {
             )}
           </div>
 
-          <div className="md:w-7/12 p-6 md:p-10 flex flex-col relative">
+          <div className="md:w-2/3 p-6 md:p-10 flex flex-col relative">
             {auth.userId === forum.creator && (
               <div
                 className="absolute top-4 right-4 md:top-10 md:right-10 z-30 flex flex-col items-end"
@@ -379,7 +379,7 @@ const ForumDetails = () => {
         </div>
       )}
 
-      {/* --- UPDATED UTILITY BAR (FIXED STICKY IN MOBILE) --- */}
+      {/* --- UTILITY BAR --- */}
       <div className="relative md:sticky md:top-16 z-20 bg-zinc-100/90 backdrop-blur-sm rounded-lg p-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm border border-zinc-200">
         <h2 className="text-2xl font-bold text-zinc-900">Posts</h2>
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
@@ -406,7 +406,7 @@ const ForumDetails = () => {
         </div>
       </div>
 
-      {/* Posts Section... */}
+      {/* --- POSTS LIST --- */}
       <div className="space-y-4 pb-12">
         {filteredPosts.length > 0 ? (
           filteredPosts.map((post) => (
