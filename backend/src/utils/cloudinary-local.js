@@ -35,6 +35,7 @@ const uploadOnCloudinary = async (imageFileLocalPath) => {
     // upload the file on cloudinary
     const response = await cloudinary.uploader.upload(imageFileLocalPath, {
       resource_type: "auto",
+      folder: "huddlenode",
     });
 
     // file has been uploaded successfully
@@ -71,12 +72,12 @@ const uploadOnCloudinary = async (imageFileLocalPath) => {
 const deleteFromCloudinary = async (imageUrl) => {
   let imageUrlArray = imageUrl.split("/");
   let imageFilename = imageUrlArray[imageUrlArray.length - 1]; // "tklrxe042qhb5kmu1n9n.jpg"
-  const imageId = imageFilename.split(".")[0]; // "tklrxe042qhb5kmu1n9n"
-  console.log("imageId:", imageId);
+  const imgPublicId = imageFilename.split(".")[0]; // "tklrxe042qhb5kmu1n9n"
+  console.log("imgPublicId:", imgPublicId);
 
-  if (!imageId) {
+  if (!imgPublicId) {
     const error = new ApiError(
-      "Cloud not get imageId from imageUrl - cloudinary.js - deleteFromCloudinary()",
+      "Cloud not get imgPublicId from imageUrl - cloudinary.js - deleteFromCloudinary()",
       400 // correct this code
     );
     console.log(`log> Error: ${error.message}`);
@@ -85,7 +86,9 @@ const deleteFromCloudinary = async (imageUrl) => {
   }
 
   try {
-    const response = await cloudinary.uploader.destroy(imageId);
+    // const response = await cloudinary.uploader.destroy(imgPublicId);
+    const response = await cloudinary.uploader.destroy(`huddlenode/${imgPublicId}`);
+
     console.log("log> Cloudinary image deleted:", response);
     return response;
   } catch (err) {

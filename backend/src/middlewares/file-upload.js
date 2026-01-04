@@ -16,9 +16,9 @@ const MIME_TYPE_MAP = {
 };
 
 export const fileUpload = multer({
-  limits: {
-    fileSize: 500000, // 500 KB limit
-  },
+  // limits: {
+  //   fileSize: 500000, // 500 KB limit
+  // },
   // Switch to memoryStorage for Vercel/Serverless compatibility
   storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {

@@ -454,7 +454,7 @@ const editUsersPfp = async (req, res, next) => {
     console.log("log> newPfpRes:-");
     console.log(newPfpRes);
 
-    if (!newPfp || !newPfp.secure_url) {
+    if (!newPfpRes || !newPfpRes.secure_url) {
       const error = new ApiError(
         "`newPfpRes` or `newPfpRes.secure_url` is not present on cloudinary - users.controller.js - editUsersPfp()"
       );
