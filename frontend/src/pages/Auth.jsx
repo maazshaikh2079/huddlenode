@@ -21,7 +21,16 @@ const Auth = () => {
 
   const pickImageHandler = (event) => {
     if (event.target.files && event.target.files.length === 1) {
-      setPfp(event.target.files[0]);
+      const pickedImgFile = event.target.files[0];
+
+      // Check if file is larger than 2MB (2 * 1024 * 1024 bytes)
+      if (pickedImgFile.size > 2000000) {
+        alert("File is too large! Please select an image under 2MB.");
+        event.target.value = null; // Clear the input
+        return;
+      }
+
+      setPfp(pickedImgFile);
     }
   };
 
