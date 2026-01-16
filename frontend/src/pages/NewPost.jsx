@@ -41,11 +41,11 @@ const NewPost = () => {
         return;
       }
 
-      setFormState({ ...formState, imageFile: pickedFile });
+      setFormState({ ...formState, imageFile: pickedImgFile });
 
       const fileReader = new FileReader();
       fileReader.onload = () => setImagePreview(fileReader.result);
-      fileReader.readAsDataURL(pickedFile);
+      fileReader.readAsDataURL(pickedImgFile);
     }
   };
 

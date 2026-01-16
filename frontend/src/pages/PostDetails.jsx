@@ -92,11 +92,11 @@ const PostDetails = () => {
         return;
       }
 
-      setSelectedImage(pickedFile);
+      setSelectedImage(pickedImgFile);
 
       const fileReader = new FileReader();
       fileReader.onload = () => setImagePreview(fileReader.result);
-      fileReader.readAsDataURL(pickedFile);
+      fileReader.readAsDataURL(pickedImgFile);
     }
   };
 

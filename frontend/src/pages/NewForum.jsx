@@ -40,12 +40,12 @@ const NewForum = () => {
         return;
       }
 
-      setFormState({ ...formState, imageFile: pickedFile });
+      setFormState({ ...formState, imageFile: pickedImgFile });
 
       // Generate preview for UI
       const fileReader = new FileReader();
       fileReader.onload = () => setImagePreview(fileReader.result);
-      fileReader.readAsDataURL(pickedFile);
+      fileReader.readAsDataURL(pickedImgFile);
     }
   };
 
